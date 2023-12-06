@@ -1,7 +1,8 @@
 package main
 
-import "bookcrawler.com/kyobo"
+import "bookcrawler.com/mail"
 
 func main() {
-	kyobo.GetITNewBooks()
+	// kyobo.GetITNewBooks()
+	mail.Send()
 }
