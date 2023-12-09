@@ -2,13 +2,11 @@ package mail
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
 	"io"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -73,25 +71,14 @@ func Send() {
 }
 
 func getWatchersList(owner, repo string) ([]string, error) {
-
 	// https://docs.github.com/en/rest/activity/watching?apiVersion=2022-11-28#list-watchers 이걸로
 	url := fmt.Sprintf("%s/repos/%s/%s/subscribers", githubAPIURL, owner, repo)
-	fmt.Println(url)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Authorization", "Bearer "+githubToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	//fmt.Println("resp")
-	//fmt.Println(resp)
-	if err != nil {
-		return nil, err
-	}
+	resp, err := githubGetReq(url)
 	defer resp.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	//fmt.Println("body")
@@ -123,24 +110,12 @@ func getWatchersList(owner, repo string) ([]string, error) {
 
 func importEmailToName(userName string) ([]string, error) {
 	url := fmt.Sprintf("%s/users/%s/emails", githubAPIURL, userName)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Authorization", "Bearer "+githubToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	//fmt.Println("resp")
-	//fmt.Println(resp)
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("status code is not 200")
-	}
-	if err != nil {
-		return nil, err
-	}
+	resp, err := githubGetReq(url)
 	defer resp.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	//fmt.Println("body")
