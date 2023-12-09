@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
-	"io"
 	"log"
 	"os"
 )
@@ -73,19 +72,9 @@ func Send() {
 func getWatchersList(owner, repo string) ([]string, error) {
 	// https://docs.github.com/en/rest/activity/watching?apiVersion=2022-11-28#list-watchers 이걸로
 	url := fmt.Sprintf("%s/repos/%s/%s/subscribers", githubAPIURL, owner, repo)
-	resp, err := githubGetReq(url)
-	defer resp.Body.Close()
+	body, err := githubGetResBody(url)
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	//fmt.Println("body")
-	//fmt.Println(body)
-	//fmt.Println("body string")
-	//fmt.Println(string(body))
-	if err != nil {
 		return nil, err
 	}
 
@@ -110,21 +99,12 @@ func getWatchersList(owner, repo string) ([]string, error) {
 
 func importEmailToName(userName string) ([]string, error) {
 	url := fmt.Sprintf("%s/users/%s/emails", githubAPIURL, userName)
-	resp, err := githubGetReq(url)
-	defer resp.Body.Close()
+	body, err := githubGetResBody(url)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	//fmt.Println("body")
-	//fmt.Println(body)
-	//fmt.Println("body string")
-	//fmt.Println(string(body))
-	if err != nil {
-		return nil, err
-	}
 	// 여기서 에러 발생
 	var watchers []map[string]interface{}
 	err = json.Unmarshal(body, &watchers)
