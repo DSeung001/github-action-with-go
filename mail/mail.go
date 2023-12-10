@@ -1,7 +1,6 @@
 package mail
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
@@ -72,57 +71,43 @@ func Send() {
 func getWatchersList(owner, repo string) ([]string, error) {
 	// https://docs.github.com/en/rest/activity/watching?apiVersion=2022-11-28#list-watchers 이걸로
 	url := fmt.Sprintf("%s/repos/%s/%s/subscribers", githubAPIURL, owner, repo)
-	body, err := githubGetResBody(url)
+	bodyMap, err := githubGetResBodyMap(url)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	// 여기서 에러 발생
-	var watchers []map[string]interface{}
-	err = json.Unmarshal(body, &watchers)
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Println("watchers")
-	//fmt.Println(watchers)
-
-	var watcherList []string
-	for _, watcher := range watchers {
-		//fmt.Println(watcher)
-		//fmt.Println(watcher["login"])
-		watcherList = append(watcherList, watcher["login"].(string))
+	var userNames []string
+	for _, watcher := range bodyMap {
+		userNames = append(userNames, watcher["login"].(string))
 	}
 
-	return watcherList, nil
+	return userNames, nil
 }
 
 func importEmailToName(userName string) ([]string, error) {
+
+	/*
+		1. https://api.github.com/users/DSeung001/events/public 에서 payload/commit으로 이메일 찾기
+		2. 두번째 방법
+	*/
+
 	url := fmt.Sprintf("%s/users/%s/emails", githubAPIURL, userName)
-	body, err := githubGetResBody(url)
+	bodyMap, err := githubGetResBodyMap(url)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	// 여기서 에러 발생
-	var watchers []map[string]interface{}
-	err = json.Unmarshal(body, &watchers)
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Println("watchers")
-	//fmt.Println(watchers)
-
-	var watcherList []string
-	for _, watcher := range watchers {
+	var emails []string
+	for _, watcher := range bodyMap {
 		fmt.Println(watcher)
 		//fmt.Println(watcher["login"])
-		watcherList = append(watcherList, watcher["email"].(string))
+		emails = append(emails, watcher["email"].(string))
 	}
-	fmt.Println(watcherList)
+	fmt.Println(emails)
 
-	return watcherList, nil
+	return emails, nil
 
 }
 

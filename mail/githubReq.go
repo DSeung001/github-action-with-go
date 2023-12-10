@@ -1,12 +1,13 @@
 package mail
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 )
 
-func githubGetResBody(url string) ([]byte, error) {
+func githubGetResBodyMap(url string) ([]map[string]interface{}, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -29,5 +30,12 @@ func githubGetResBody(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return body, nil
+
+	var bodyMap []map[string]interface{}
+	err = json.Unmarshal(body, &bodyMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodyMap, nil
 }
